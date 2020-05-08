@@ -1,4 +1,4 @@
-# Instructions for running program without IntelliJ
+# Instructions for running program from CLI
 
 ## Install SBT (scala build tool) 
 

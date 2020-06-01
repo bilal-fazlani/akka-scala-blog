@@ -6,7 +6,7 @@ import akka.actor.typed.{ActorRef, ActorSystem, Behavior, Props, Scheduler, Spaw
 import akka.actor.typed.scaladsl.AskPattern.Askable
 import akka.util.Timeout
 
-import scala.concurrent.Future
+import scala.concurrent.{Await, Future}
 import scala.concurrent.duration.DurationInt
 
 object Main extends App {
@@ -27,7 +27,7 @@ object Main extends App {
 
   val bankAccountFuture: Future[ActorRef[BankAccountMessage]] =
     actorSystem.ask[ActorRef[BankAccountMessage]] { ref =>
-      Spawn(
+      Spawn[BankAccountMessage](
         behavior = behavior(balance = 0),
         name = "account1",
         props = Props.empty,
@@ -35,7 +35,7 @@ object Main extends App {
       )
     }
 
-  for {
+  val future = for {
     bankAccount <- bankAccountFuture
     balance1    <- bankAccount ? GetBalance
     _           = println(balance1)
@@ -44,6 +44,8 @@ object Main extends App {
     balance2    <- bankAccount ? GetBalance
     _           = println(balance2)
   } yield ()
+
+  Await.result(future, 2.seconds)
 
   actorSystem.terminate()
 }
